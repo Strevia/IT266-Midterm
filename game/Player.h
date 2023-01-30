@@ -579,6 +579,7 @@ public:
 	bool					WeaponIsEnabled				( void ) const { return weaponEnabled; }
 	void					ShowCrosshair				( void );
 	void					HideCrosshair				( void );
+	void					UpdateAccel					(int num, int index); //PN: New function
 // RAVEN END
 
 //RAVEN BEGIN
@@ -795,7 +796,7 @@ public:
 	void					SetCash( float newCashAmount );
 	void					ResetCash();
 // RITUAL END
-
+	void					Move(bool changeAccel, int val, int index);
 protected:
 	void					SetupHead( const char* modelKeyName = "", idVec3 headOffset = idVec3(0, 0, 0) );
 
@@ -1029,7 +1030,6 @@ private:
 	void					EvaluateControls( void );
 	void					AdjustSpeed( void );
 	void					AdjustBodyAngles( void );
-	void					Move( void );
 	void					SetSpectateOrigin( void );
 
  	void					InitAASLocation( void );

@@ -1305,6 +1305,13 @@ bool idPhysics_Player::CheckJump( void ) {
 	return true;
 }
 
+//PN: Add jump
+void idPhysics_Player::addVel(int val, int index) {
+	idVec3 addVelocity = 2.0f * maxJumpHeight * -gravityVector;
+	addVelocity *= idMath::Sqrt(addVelocity.Normalize());
+	current.velocity += addVelocity;
+}
+
 /*
 =============
 idPhysics_Player::CheckWaterJump

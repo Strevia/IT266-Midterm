@@ -80,6 +80,9 @@ public:
 	const idVec3 &			PlayerGetOrigin( void ) const;	// != GetOrigin
 
 public:	// common physics interface
+
+	void					Accelerate(const idVec3& wishdir, const float wishspeed, const float accel);
+
 	bool					Evaluate( int timeStepMSec, int endTimeMSec );
 	void					UpdateTime( int endTimeMSec );
 	int						GetTime( void ) const;
@@ -119,6 +122,11 @@ public:	// common physics interface
 
 	void					SetClipModelNoLink( idClipModel *clip );
 
+	idVec3					viewForward;
+	idVec3					viewRight;
+
+	void					addVel(int val, int index); //PN
+
 private:
 	// player physics state
 	playerPState_t			current;
@@ -139,8 +147,6 @@ private:
 	int						framemsec;
 	float					frametime;
 	float					playerSpeed;
-	idVec3					viewForward;
-	idVec3					viewRight;
 
 	// walk movement
 	bool					walking;
@@ -158,7 +164,6 @@ private:
 
 private:
 	float					CmdScale( const usercmd_t &cmd ) const;
-	void					Accelerate( const idVec3 &wishdir, const float wishspeed, const float accel );
 	bool					SlideMove( bool gravity, bool stepUp, bool stepDown, bool push );
 	void					Friction( void );
 	void					WaterJumpMove( void );

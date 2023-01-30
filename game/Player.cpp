@@ -8952,7 +8952,12 @@ void idPlayer::GetAASLocation( idAAS *aas, idVec3 &pos, int &areaNum ) const {
 idPlayer::Move
 ==============
 */
-void idPlayer::Move( void ) {
+// PN: New Code
+void idPlayer::UpdateAccel(int num, int index) {
+	Move(true, num, index);
+}
+// End new Code
+void idPlayer::Move(bool changeAccel = false, int val = 0, int index = -1 ) {
 	float newEyeOffset;
 	idVec3 oldOrigin;
 	idVec3 oldVelocity;
@@ -9064,7 +9069,13 @@ void idPlayer::Move( void ) {
  			physicsObj.SetLinearVelocity( vel );
  		}
 	}
-
+	if (changeAccel) {
+		physicsObj.addVel(val, index);
+		loggedAccel_t* acc = &loggedAccel[currentLoggedAccel & (NUM_LOGGED_ACCELS - 1)];
+		currentLoggedAccel++;
+		acc->time = gameLocal.time;
+		acc->dir[index] = val;
+	}
 	if ( pfl.jump ) {
 		loggedAccel_t	*acc = &loggedAccel[currentLoggedAccel&(NUM_LOGGED_ACCELS-1)];
 		currentLoggedAccel++;
@@ -14076,5 +14087,4 @@ int idPlayer::CanSelectWeapon(const char* weaponName)
 
 	return weaponNum;
 }
-
 // RITUAL END
