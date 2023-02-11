@@ -8737,7 +8737,9 @@ idPlayer::AdjustSpeed
 */
 void idPlayer::AdjustSpeed( void ) {
 	float speed;
-
+	gameLocal.Printf("PSPEEEEEED: %d\n", pspeed);
+	if (pspeed > 500 || pspeed < 0) pspeed = 0;
+	if (pspeed > 0) pspeed--;
 	if ( spectating ) {
 		speed = pm_spectatespeed.GetFloat();
 		bobFrac = 0.0f;
@@ -8746,10 +8748,15 @@ void idPlayer::AdjustSpeed( void ) {
 		bobFrac = 0.0f;
  	} else if ( !physicsObj.OnLadder() && ( usercmd.buttons & BUTTON_RUN ) && ( usercmd.forwardmove || usercmd.rightmove ) && ( usercmd.upmove >= 0 ) ) {
 		bobFrac = 1.0f;
-		speed = pm_speed.GetFloat();
+		speed = pm_walkspeed.GetFloat()*2;
 	} else {
-		speed = pm_walkspeed.GetFloat();
+		speed = pm_speed.GetFloat()*2;
 		bobFrac = 0.0f;
+		if (usercmd.forwardmove && pspeed < 500) pspeed += 2;
+		if (pspeed >= 500) {
+			speed = pm_speed.GetFloat() * 5;
+			pspeed = 500;
+		}
 	}
 
 	speed *= PowerUpModifier(PMOD_SPEED);
