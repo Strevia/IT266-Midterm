@@ -8737,7 +8737,6 @@ idPlayer::AdjustSpeed
 */
 void idPlayer::AdjustSpeed( void ) {
 	float speed;
-	gameLocal.Printf("PSPEEEEEED: %d\n", pspeed);
 	if (pspeed > 500 || pspeed < 0) pspeed = 0;
 	if (pspeed > 0) pspeed--;
 	if ( spectating ) {

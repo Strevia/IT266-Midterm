@@ -1116,7 +1116,10 @@ void idPhysics_Player::CheckGround( bool checkStuck ) {
 			// don't allow another jump for a little while
 			current.movementFlags |= PMF_TIME_LAND;
 			current.movementTime = 250;
-		}		
+		}
+		else {
+			current.movementTime = 50;
+		}
 	}
 
 	// let the entity know about the collision
@@ -1273,6 +1276,7 @@ idPhysics_Player::CheckJump
 */
 bool idPhysics_Player::CheckJump( void ) {
 	idVec3 addVelocity;
+	int factor = 1;
 
 	if ( command.upmove < 10 ) {
 		// not holding jump
@@ -1288,12 +1292,12 @@ bool idPhysics_Player::CheckJump( void ) {
 	if ( current.movementFlags & PMF_DUCKED ) {
 		return false;
 	}
-
 	groundPlane = false;		// jumping away
 	walking = false;
 	current.movementFlags |= PMF_JUMP_HELD | PMF_JUMPED;
-
-	addVelocity = 2.0f * maxJumpHeight * -gravityVector;
+	if (current.movementTime > 0) factor = 2;
+	//gameLocal.Printf("Movement time: %d\n", current.);
+	addVelocity = 2.0f * maxJumpHeight * -gravityVector * factor;
 	addVelocity *= idMath::Sqrt( addVelocity.Normalize() );
 	current.velocity += addVelocity;
 

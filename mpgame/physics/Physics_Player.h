@@ -149,6 +149,8 @@ private:
 	waterLevel_t			waterLevel;
 	int						waterType;
 
+	int						jumps;
+
 private:
 	float					CmdScale( const usercmd_t &cmd ) const;
 	void					Accelerate( const idVec3 &wishdir, const float wishspeed, const float accel );
