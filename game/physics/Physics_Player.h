@@ -161,6 +161,7 @@ private:
 	// results of last evaluate
 	waterLevel_t			waterLevel;
 	int						waterType;
+	int						jumps;
 
 private:
 	float					CmdScale( const usercmd_t &cmd ) const;

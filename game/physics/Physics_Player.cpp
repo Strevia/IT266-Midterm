@@ -1280,6 +1280,7 @@ bool idPhysics_Player::CheckJump( void ) {
 
 	if ( command.upmove < 10 ) {
 		// not holding jump
+		if (!PMF_TIME_LAND && current.movementTime == 0) jumps = 0;
 		return false;
 	}
 
@@ -1295,8 +1296,11 @@ bool idPhysics_Player::CheckJump( void ) {
 	groundPlane = false;		// jumping away
 	walking = false;
 	current.movementFlags |= PMF_JUMP_HELD | PMF_JUMPED;
-	if (current.movementTime > 0) factor = 2;
-	//gameLocal.Printf("Movement time: %d\n", current.);
+	if (current.movementTime > 0) {
+		jumps = (jumps + 1) % 3;
+		factor = (jumps + 1);
+	}
+	gameLocal.Printf("Jumps: %d\n", factor);
 	addVelocity = 2.0f * maxJumpHeight * -gravityVector * factor;
 	addVelocity *= idMath::Sqrt( addVelocity.Normalize() );
 	current.velocity += addVelocity;
