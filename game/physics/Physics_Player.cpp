@@ -1148,7 +1148,17 @@ void idPhysics_Player::CheckDuck( void ) {
 	idVec3 end;
 	idBounds bounds;
 	float maxZ;
-
+	if (current.movementFlags & PMF_JUMPED) {
+		double sideSpeed = sqrt(current.velocity[0] * current.velocity[0] + current.velocity[1] * current.velocity[1]);
+		if (sideSpeed > 0) {
+			idVec3 facing, addVelocity;
+			gameLocal.GetLocalPlayer()->viewAngles.ToVectors(&facing, NULL, NULL);
+			addVelocity = 100 * facing;
+			addVelocity += -gravityVector * 2.0f * maxJumpHeight * 0.25;
+			current.velocity += addVelocity;
+			return;
+		}
+	}
 	if ( current.movementType == PM_DEAD ) {
 		maxZ = pm_deadheight.GetFloat();
 	} else {
@@ -1174,7 +1184,7 @@ void idPhysics_Player::CheckDuck( void ) {
 		if ( current.movementFlags & PMF_DUCKED ) {
 // RAVEN BEGIN
 // bdube: crouch slide
-			if ( !current.crouchSlideTime ) {
+			if ( !current.crouchSlideTime  && !(current.movementFlags & PMF_JUMPED)) {
 				playerSpeed = crouchSpeed;
 			}
 // RAVEN END
@@ -1280,7 +1290,7 @@ bool idPhysics_Player::CheckJump( void ) {
 
 	if ( command.upmove < 10 ) {
 		// not holding jump
-		if (!PMF_TIME_LAND && current.movementTime == 0) jumps = 0;
+		if (!(current.movementFlags & PMF_TIME_LAND) && current.movementTime <= 0) jumps = 0;
 		return false;
 	}
 
@@ -1290,18 +1300,16 @@ bool idPhysics_Player::CheckJump( void ) {
 	}
 
 	// don't jump if we can't stand up
-	if ( current.movementFlags & PMF_DUCKED ) {
-		return false;
-	}
 	groundPlane = false;		// jumping away
 	walking = false;
 	current.movementFlags |= PMF_JUMP_HELD | PMF_JUMPED;
+	double sideSpeed = sqrt(current.velocity[0] * current.velocity[0] + current.velocity[1] * current.velocity[1]);
 	if (current.movementTime > 0) {
 		jumps = (jumps + 1) % 3;
-		factor = (jumps + 1);
+		if (jumps != 2) factor = jumps + 1;
+		else factor = 5;
 	}
-	gameLocal.Printf("Jumps: %d\n", factor);
-	addVelocity = 2.0f * maxJumpHeight * -gravityVector * factor;
+	addVelocity = 2.0f * maxJumpHeight * -gravityVector * factor * max(sideSpeed/300, 1);
 	addVelocity *= idMath::Sqrt( addVelocity.Normalize() );
 	current.velocity += addVelocity;
 
@@ -1315,9 +1323,11 @@ bool idPhysics_Player::CheckJump( void ) {
 
 //PN: Add jump
 void idPhysics_Player::addVel(int val, int index) {
-	idVec3 addVelocity = 2.0f * maxJumpHeight * -gravityVector;
-	addVelocity *= idMath::Sqrt(addVelocity.Normalize());
-	current.velocity += addVelocity;
+	if (current.velocity[2] != 0) {
+		idVec3 addVelocity = 2.0f * maxJumpHeight * -gravityVector*0.1;
+		addVelocity *= idMath::Sqrt(addVelocity.Normalize());
+		current.velocity += addVelocity;
+	}
 }
 
 /*
