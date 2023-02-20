@@ -1322,9 +1322,9 @@ bool idPhysics_Player::CheckJump( void ) {
 }
 
 //PN: Add jump
-void idPhysics_Player::addVel(int val, int index) {
-	if (current.velocity[2] != 0) {
-		idVec3 addVelocity = 2.0f * maxJumpHeight * -gravityVector*0.1;
+void idPhysics_Player::addVel(int val, bool index) {
+	if (current.velocity[2] != 0 || index) {
+		idVec3 addVelocity = 2.0f * maxJumpHeight * -gravityVector*0.1*val;
 		addVelocity *= idMath::Sqrt(addVelocity.Normalize());
 		current.velocity += addVelocity;
 	}

@@ -30,7 +30,6 @@
 
 
 
-
 idCVar net_predictionErrorDecay( "net_predictionErrorDecay", "112", CVAR_FLOAT | CVAR_GAME | CVAR_NOCHEAT, "time in milliseconds it takes to fade away prediction errors", 0.0f, 200.0f );
 idCVar net_showPredictionError( "net_showPredictionError", "-1", CVAR_INTEGER | CVAR_GAME | CVAR_NOCHEAT, "show prediction errors for the given client", -1, MAX_CLIENTS );
 
@@ -8959,11 +8958,11 @@ idPlayer::Move
 ==============
 */
 // PN: New Code
-void idPlayer::UpdateAccel(int num, int index) {
+void idPlayer::UpdateAccel(int num, bool index) {
 	Move(true, num, index);
 }
 // End new Code
-void idPlayer::Move(bool changeAccel = false, int val = 0, int index = -1 ) {
+void idPlayer::Move(bool changeAccel = false, int val = 0, bool index = false ) {
 	float newEyeOffset;
 	idVec3 oldOrigin;
 	idVec3 oldVelocity;

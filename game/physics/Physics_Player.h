@@ -125,7 +125,7 @@ public:	// common physics interface
 	idVec3					viewForward;
 	idVec3					viewRight;
 
-	void					addVel(int val, int index); //PN
+	void					addVel(int val, bool index); //PN
 
 private:
 	// player physics state
