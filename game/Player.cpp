@@ -3431,9 +3431,6 @@ void idPlayer::UpdateHudStats( idUserInterface *_hud ) {
 
 	//_hud->HandleNamedEvent( "updateArmorHealthAir" );
 
-	//P SPEED
-	_hud->SetStateInt("player_pspeed", pspeed);
-
 	if ( weapon ) {
 		UpdateHudAmmo( _hud );
 	}
