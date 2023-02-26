@@ -26,6 +26,7 @@ protected:
 
 	virtual void		OnTacticalChange	( aiTactical_t oldTactical );
 	virtual void		OnDeath				( void );
+	
 
 private:
 
@@ -40,7 +41,6 @@ private:
 	stateResult_t		State_Torso_Pain		( const stateParms_t& parms );
 	stateResult_t		State_Torso_LeapAttack	( const stateParms_t& parms );
 
-	idVec3				home;
 
 	CLASS_STATES_PROTOTYPE ( rvMonsterGrunt );
 };
@@ -132,9 +132,30 @@ rvMonsterGrunt::CheckActions
 ================
 */
 bool rvMonsterGrunt::CheckActions ( void ) {
-	WanderAround();
+	int distance = DistanceTo(gameLocal.GetLocalPlayer());
+	if (distance <= 50) {
+		idBounds bound = physicsObj.GetBounds();
+		idVec3 position;
+		idMat3 _;
+		gameLocal.GetLocalPlayer()->GetPosition(position, _);
+		if (gameLocal.GetLocalPlayer()->GetPhysics()->GetLinearVelocity()[2] < 0) {
+			gameLocal.Printf("Jumped on him\n");
+			gameLocal.GetLocalPlayer()->UpdateAccel(1000, false);
+			return false;
+		}
+		idVec3	kickDir = physicsObj.GetOrigin() - position;
+		kickDir /= kickDir.Normalize();
+
+		idVec3	globalKickDir;
+		globalKickDir = (viewAxis * physicsObj.GetGravityAxis()) * kickDir;
+
+		gameLocal.GetLocalPlayer()->Damage(this, this, globalKickDir, "melee_grunt", 1, NULL);
+		return false;
+	}
+	if (gameLocal.GetTime() % 1000 == 0) WanderAround();
 	return false;
 }
+
 
 /*
 ================

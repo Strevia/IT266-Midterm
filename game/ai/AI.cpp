@@ -2678,7 +2678,7 @@ kickDir is specified in the monster's coordinate system, and gives the direction
 that the view kick and knockback should go
 =====================
 */
-void idAI::DirectDamage( const char *meleeDefName, idEntity *ent ) {
+void idAI::DirectDamage(const char *meleeDefName, idEntity *ent ) {
 	const idDict *meleeDef;
 	const char *p;
 	const idSoundShader *shader;

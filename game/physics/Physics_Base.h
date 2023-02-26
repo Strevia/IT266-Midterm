@@ -135,6 +135,7 @@ public:	// common physics interface
 
 	void					WriteToSnapshot( idBitMsgDelta &msg ) const;
 	void					ReadFromSnapshot( const idBitMsgDelta &msg );
+	idList<contactEntity_t>	contactEntities;		// entities touching this physics object
 
 protected:
 	idEntity *				self;					// entity using this physics object
@@ -142,7 +143,6 @@ protected:
 	idVec3					gravityVector;			// direction and magnitude of gravity
 	idVec3					gravityNormal;			// normalized direction of gravity
 	idList<contactInfo_t>	contacts;				// contacts with other physics objects
-	idList<contactEntity_t>	contactEntities;		// entities touching this physics object
 
 protected:
 							// add ground contacts for the clip model
