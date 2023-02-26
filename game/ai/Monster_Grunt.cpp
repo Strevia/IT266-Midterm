@@ -40,6 +40,8 @@ private:
 	stateResult_t		State_Torso_Pain		( const stateParms_t& parms );
 	stateResult_t		State_Torso_LeapAttack	( const stateParms_t& parms );
 
+	idVec3				home;
+
 	CLASS_STATES_PROTOTYPE ( rvMonsterGrunt );
 };
 
@@ -61,17 +63,7 @@ rvMonsterGrunt::Spawn
 ================
 */
 void rvMonsterGrunt::Spawn ( void ) {
-	rageThreshold = spawnArgs.GetInt ( "health_rageThreshold" );
-
-	// Custom actions
-	actionMeleeMoveAttack.Init	( spawnArgs, "action_meleeMoveAttack",	NULL,				AIACTIONF_ATTACK );
-	actionChaingunAttack.Init	( spawnArgs, "action_chaingunAttack",	NULL,				AIACTIONF_ATTACK );
-	actionLeapAttack.Init		( spawnArgs, "action_leapAttack",		"Torso_LeapAttack",	AIACTIONF_ATTACK );
-
-	// Enraged to start?
-	if ( spawnArgs.GetBool ( "preinject" ) ) {
-		RageStart ( );
-	}	
+	animator.SetPlaybackRate(0.5f);
 }
 
 /*
@@ -140,52 +132,7 @@ rvMonsterGrunt::CheckActions
 ================
 */
 bool rvMonsterGrunt::CheckActions ( void ) {
-	// If our health is below the rage threshold then enrage
-	if ( health < rageThreshold ) { 
-		PerformAction ( "Torso_Enrage", 4, true );
-		return true;
-	}
-
-	// Moving melee attack?
-	if ( PerformAction ( &actionMeleeMoveAttack, (checkAction_t)&idAI::CheckAction_MeleeAttack, NULL ) ) {
-		return true;
-	}
-	
-	// Default actions
-	if ( CheckPainActions ( ) ) {
-		return true;
-	}
-
-	if ( PerformAction ( &actionEvadeLeft,   (checkAction_t)&idAI::CheckAction_EvadeLeft, &actionTimerEvade )			 ||
-			PerformAction ( &actionEvadeRight,  (checkAction_t)&idAI::CheckAction_EvadeRight, &actionTimerEvade )			 ||
-			PerformAction ( &actionJumpBack,	 (checkAction_t)&idAI::CheckAction_JumpBack, &actionTimerEvade )			 ||
-			PerformAction ( &actionLeapAttack,  (checkAction_t)&idAI::CheckAction_LeapAttack )	) {
-		return true;
-	} else if ( PerformAction ( &actionMeleeAttack, (checkAction_t)&idAI::CheckAction_MeleeAttack ) ) {
-		standingMeleeNoAttackTime = 0;
-		return true;
-	} else {
-		if ( actionMeleeAttack.status != rvAIAction::STATUS_FAIL_TIMER
-			&& actionMeleeAttack.status != rvAIAction::STATUS_FAIL_EXTERNALTIMER
-			&& actionMeleeAttack.status != rvAIAction::STATUS_FAIL_CHANCE )
-		{//melee attack fail for any reason other than timer?
-			if ( combat.tacticalCurrent == AITACTICAL_MELEE && !move.fl.moving )
-			{//special case: we're in tactical melee and we're close enough to think we've reached the enemy, but he's just out of melee range!
-				if ( !standingMeleeNoAttackTime )
-				{
-					standingMeleeNoAttackTime = gameLocal.GetTime();
-				}
-				else if ( standingMeleeNoAttackTime + 2500 < gameLocal.GetTime() )
-				{//we've been standing still and not attacking for at least 2.5 seconds, fall back to ranged attack
-					//allow ranged attack
-					actionRangedAttack.fl.disabled = false;
-				}
-			}
-		}
-		if ( PerformAction ( &actionRangedAttack,(checkAction_t)&idAI::CheckAction_RangedAttack, &actionTimerRangedAttack ) ) {
-			return true;
-		}
-	}
+	WanderAround();
 	return false;
 }
 
