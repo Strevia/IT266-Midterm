@@ -140,11 +140,12 @@ bool rvMonsterGrunt::CheckActions ( void ) {
 		gameLocal.GetLocalPlayer()->GetPosition(position, _);
 		if (gameLocal.GetLocalPlayer()->GetPhysics()->GetLinearVelocity()[2] < 0) {
 			gameLocal.Printf("Jumped on him\n");
-			gameLocal.GetLocalPlayer()->UpdateAccel(1000, false);
+			gameLocal.GetLocalPlayer()->UpdateAccel(100, false);
+			Killed(gameLocal.GetLocalPlayer(), gameLocal.GetLocalPlayer(), health, vec3_origin, 0);
 			return false;
 		}
 		idVec3	kickDir = physicsObj.GetOrigin() - position;
-		kickDir /= kickDir.Normalize();
+		kickDir /= kickDir.Length();
 
 		idVec3	globalKickDir;
 		globalKickDir = (viewAxis * physicsObj.GetGravityAxis()) * kickDir;
@@ -163,7 +164,7 @@ rvMonsterGrunt::OnDeath
 ================
 */
 void rvMonsterGrunt::OnDeath ( void ) {
-	RageStop ( );
+	//RageStop ( );
 	return idAI::OnDeath ( );
 }
 
@@ -193,10 +194,6 @@ rvMonsterGrunt::AdjustHealthByDamage
 */
 void rvMonsterGrunt::AdjustHealthByDamage ( int damage ) {
 	// Take less damage during enrage process 
-	if ( rageThreshold && health < rageThreshold ) { 
-		health -= (damage * 0.25f);
-		return;
-	}
 	return idAI::AdjustHealthByDamage ( damage );
 }
 

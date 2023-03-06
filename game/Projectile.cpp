@@ -662,7 +662,7 @@ bool idProjectile::Collide( const trace_t &collision, const idVec3 &velocity, bo
 				} else {
 					trace.c.id = 0;
 				}
-				
+
 
 				trigger->Signal( SIG_TOUCH );
 				trigger->ProcessEvent( &EV_Touch, this, &trace );
