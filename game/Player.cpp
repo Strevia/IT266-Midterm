@@ -4409,17 +4409,6 @@ void idPlayer::StartPowerUpEffect( int powerup ) {
 			break;
 		}
 		case POWERUP_QUADDAMAGE: {
-			powerUpOverlay = quadOverlay;
-
-			StopEffect( "fx_regeneration" );
-			PlayEffect( "fx_quaddamage", animator.GetJointHandle( "chest" ), true );			
-			StartSound( "snd_quaddamage_idle", SND_CHANNEL_POWERUP_IDLE, 0, false, NULL );
-
-			// Spawn quad effect
-			powerupEffect = gameLocal.GetEffect( spawnArgs, "fx_quaddamage_crawl" );
-			powerupEffectTime = gameLocal.time;
-			powerupEffectType = POWERUP_QUADDAMAGE;
-
 			break;
 		}
 
@@ -4547,11 +4536,6 @@ void idPlayer::StopPowerUpEffect( int powerup ) {
 
 	switch( powerup ) {
 		case POWERUP_QUADDAMAGE: {
-			powerupEffect = NULL;
-			powerupEffectTime = 0;
-			powerupEffectType = 0;
-
-			StopEffect( "fx_quaddamage" );
 			break;
 		}
 		case POWERUP_REGENERATION: {
@@ -4867,7 +4851,7 @@ void idPlayer::UpdatePowerUps( void ) {
 			}
 
 			continue;
-		} else if ( inventory.powerupEndTime[ i ] != -1 && gameLocal.isServer ) {
+		} else if ( inventory.powerupEndTime[ i ] != -1 ) {
 			// This particular powerup needs to respawn in a special way.
 			if ( i == POWERUP_DEADZONE ) {
 				gameLocal.mpGame.GetGameState()->SpawnDeadZonePowerup();
@@ -8741,13 +8725,14 @@ void idPlayer::AdjustSpeed( void ) {
 	float speed;
 	if (pspeed > 500 || pspeed < 0) pspeed = 0;
 	if (pspeed > 0) pspeed--;
+	if (PowerUpActive(POWERUP_QUADDAMAGE)) pspeed = 500;
 	if ( spectating ) {
 		speed = pm_spectatespeed.GetFloat();
 		bobFrac = 0.0f;
 	} else if ( noclip ) {
 		speed = pm_noclipspeed.GetFloat();
 		bobFrac = 0.0f;
- 	} else if ( !physicsObj.OnLadder() && ( usercmd.buttons & BUTTON_RUN ) && ( usercmd.forwardmove || usercmd.rightmove ) && ( usercmd.upmove >= 0 ) ) {
+ 	} else if ( !physicsObj.OnLadder() && ( usercmd.buttons & BUTTON_RUN ) && ( usercmd.forwardmove || usercmd.rightmove ) && ( usercmd.upmove >= 0 ) && (!PowerUpActive(POWERUP_QUADDAMAGE)) ) {
 		bobFrac = 1.0f;
 		speed = pm_walkspeed.GetFloat()*2;
 	} else {

@@ -134,6 +134,10 @@ rvMonsterGrunt::CheckActions
 bool rvMonsterGrunt::CheckActions ( void ) {
 	int distance = DistanceTo(gameLocal.GetLocalPlayer());
 	if (distance <= 50) {
+		if (gameLocal.GetLocalPlayer()->PowerUpActive(POWERUP_QUADDAMAGE)) {
+			Killed(gameLocal.GetLocalPlayer(), gameLocal.GetLocalPlayer(), health, vec3_origin, 0);
+			return false;
+		}
 		idBounds bound = physicsObj.GetBounds();
 		idVec3 position;
 		idMat3 _;

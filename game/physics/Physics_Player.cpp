@@ -1285,6 +1285,8 @@ idPhysics_Player::CheckJump
 =============
 */
 bool idPhysics_Player::CheckJump( void ) {
+	gameLocal.Printf("Current pos: %f %f %f\n", current.origin[0], current.origin[1], current.origin[2]);
+	gameLocal.Printf("Current powerups: %d\n", gameLocal.GetLocalPlayer()->PowerUpActive(POWERUP_QUADDAMAGE));
 	idVec3 addVelocity;
 	int factor = 1;
 
