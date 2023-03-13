@@ -43,6 +43,18 @@ const int PMF_TIME_KNOCKBACK	= 64;		// movementTime is an air-accelerate only ti
 const int PMF_TIME_WATERJUMP	= 128;		// movementTime is waterjump
 const int PMF_ALL_TIMES			= (PMF_TIME_WATERJUMP|PMF_TIME_LAND|PMF_TIME_KNOCKBACK);
 
+const int WARPS[][2][3] = {
+	{
+		{9926, -7295, -60},
+		{9926, -7408, 128}
+	},
+	{
+		{9926, -7408, 128},
+		{9926, -7295, -60}
+	}
+};
+const int NUMWARPS = 2;
+
 int c_pmove = 0;
 
 float idPhysics_Player::Pm_Accelerate( void ) {
@@ -1286,7 +1298,6 @@ idPhysics_Player::CheckJump
 */
 bool idPhysics_Player::CheckJump( void ) {
 	gameLocal.Printf("Current pos: %f %f %f\n", current.origin[0], current.origin[1], current.origin[2]);
-	gameLocal.Printf("Current powerups: %d\n", gameLocal.GetLocalPlayer()->PowerUpActive(POWERUP_QUADDAMAGE));
 	idVec3 addVelocity;
 	int factor = 1;
 
@@ -1952,6 +1963,15 @@ bool idPhysics_Player::Evaluate( int timeStepMSec, int endTimeMSec ) {
 		}
 	}
 // RAVEN END
+	if (current.velocity.IsZero()) {
+		for (int i = 0; i < NUMWARPS; i++) {
+			if (current.origin[0] - WARPS[i][0][0] <= 5 && current.origin[1] - WARPS[i][0][1] <= 5 && current.origin[2] - WARPS[i][0][2] <= 5) {
+				current.origin[0] = WARPS[i][1][0];
+				current.origin[1] = WARPS[i][1][1];
+				current.origin[2] = WARPS[i][1][2];
+			}
+		}
+	}
 
 	return true; //( current.origin != oldOrigin );
 }

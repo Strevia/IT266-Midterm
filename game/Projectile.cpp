@@ -788,7 +788,7 @@ bool idProjectile::Collide( const trace_t &collision, const idVec3 &velocity, bo
 		bool bounce = false;
 		
 		// Determine if the projectile should bounce
-		bounce = !physicsObj.IsInWater() && !projectileFlags.detonate_on_world && !canDamage;
+		bounce = !physicsObj.IsInWater() && !projectileFlags.detonate_on_world;
 		bounce = bounce && (bounceCount == -1 || bounceCount > 0);
 		//assert(collision.c.material);
 		if ( !bounce && collision.c.material && (collision.c.material->GetSurfaceFlags() & SURF_BOUNCE) ) {
@@ -799,6 +799,11 @@ bool idProjectile::Collide( const trace_t &collision, const idVec3 &velocity, bo
 			if ( bounceCount != -1 ) {
 				bounceCount--;
 			}
+			idVec3 newVelocity = physicsObj.GetLinearVelocity();
+			newVelocity[2] *= -1;
+			physicsObj.SetLinearVelocity(newVelocity);
+
+			return false;
 			
 			StartSound( "snd_ricochet", SND_CHANNEL_ITEM, 0, true, NULL );
 
