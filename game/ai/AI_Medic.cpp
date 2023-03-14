@@ -198,7 +198,9 @@ void rvAIMedic::TalkTo( idActor *actor )  {
 		idPlayer* player = dynamic_cast<idPlayer*>(actor);
 		if ( player )
 		{
+
 			emergencyOverride = true;
+			gameLocal.inCinematic = true;
 			if ( AvailableToTakePatient() && CheckTakePatient( player ) )
 			{
 				return;
@@ -283,7 +285,6 @@ void rvAIMedic::TakePatient( idPlayer* pPatient )
 	lookTarget = patient;
 	healing = false;
 	//healedAmount = 0;
-
 	if ( pPatient && DistanceTo( pPatient ) > 250.0f && !silent ) 
 	{
 		//have enough time to say this before we get there...?
@@ -305,6 +306,7 @@ void rvAIMedic::TakePatient( idPlayer* pPatient )
 	if ( healDebounceInterval ) {
 		healDebounceTime = gameLocal.GetTime() + healDebounceInterval;
 	}
+	gameLocal.inCinematic = false;
 	gameLocal.GetLocalPlayer()->UpdateAccel(100, 2);
 }
 

@@ -1965,7 +1965,7 @@ bool idPhysics_Player::Evaluate( int timeStepMSec, int endTimeMSec ) {
 // RAVEN END
 	if (current.velocity.IsZero()) {
 		for (int i = 0; i < NUMWARPS; i++) {
-			if (current.origin[0] - WARPS[i][0][0] <= 5 && current.origin[1] - WARPS[i][0][1] <= 5 && current.origin[2] - WARPS[i][0][2] <= 5) {
+			if (abs(current.origin[0] - WARPS[i][0][0]) <= 5 && abs(current.origin[1] - WARPS[i][0][1]) <= 5 && abs(current.origin[2] - WARPS[i][0][2]) <= 5) {
 				current.origin[0] = WARPS[i][1][0];
 				current.origin[1] = WARPS[i][1][1];
 				current.origin[2] = WARPS[i][1][2];
