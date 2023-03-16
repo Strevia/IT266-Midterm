@@ -43,7 +43,8 @@ const int PMF_TIME_KNOCKBACK	= 64;		// movementTime is an air-accelerate only ti
 const int PMF_TIME_WATERJUMP	= 128;		// movementTime is waterjump
 const int PMF_ALL_TIMES			= (PMF_TIME_WATERJUMP|PMF_TIME_LAND|PMF_TIME_KNOCKBACK);
 
-const int WARPS[][2][3] = {
+const int NUMWARPS = 2;
+const int WARPS[][NUMWARPS][3] = {
 	{
 		{9926, -7295, -60},
 		{9926, -7408, 128}
@@ -53,7 +54,6 @@ const int WARPS[][2][3] = {
 		{9926, -7295, -60}
 	}
 };
-const int NUMWARPS = 2;
 
 int c_pmove = 0;
 
@@ -1160,16 +1160,8 @@ void idPhysics_Player::CheckDuck( void ) {
 	idVec3 end;
 	idBounds bounds;
 	float maxZ;
-	if (current.movementFlags & PMF_JUMPED) {
-		double sideSpeed = sqrt(current.velocity[0] * current.velocity[0] + current.velocity[1] * current.velocity[1]);
-		if (sideSpeed > 0) {
-			idVec3 facing, addVelocity;
-			gameLocal.GetLocalPlayer()->viewAngles.ToVectors(&facing, NULL, NULL);
-			addVelocity = 100 * facing;
-			addVelocity += -gravityVector * 2.0f * maxJumpHeight * 0.25;
-			current.velocity += addVelocity;
-			return;
-		}
+	if (command.upmove > 10 && (current.movementFlags & PMF_DUCKED)) {
+		gameLocal.Printf("Crouch jump\n");
 	}
 	if ( current.movementType == PM_DEAD ) {
 		maxZ = pm_deadheight.GetFloat();
@@ -1187,7 +1179,7 @@ void idPhysics_Player::CheckDuck( void ) {
 // ddynerman: multiple clip worlds
 				gameLocal.Translation( self, trace, current.origin, end, clipModel, clipModel->GetAxis(), clipMask, self );
 // RAVEN END
-				if ( trace.fraction >= 1.0f ) {
+				if ( trace.fraction >= 1.0f) {
 					current.movementFlags &= ~PMF_DUCKED;
 				}
 			}
@@ -1198,6 +1190,9 @@ void idPhysics_Player::CheckDuck( void ) {
 // bdube: crouch slide
 			if ( !current.crouchSlideTime  && !(current.movementFlags & PMF_JUMPED)) {
 				playerSpeed = crouchSpeed;
+			}
+			if (current.movementFlags & PMF_JUMPED || current.movementFlags & PMF_JUMP_HELD){
+				gameLocal.Printf("Crouch jump?\n");
 			}
 // RAVEN END
 			maxZ = pm_crouchheight.GetFloat();			
@@ -1297,7 +1292,7 @@ idPhysics_Player::CheckJump
 =============
 */
 bool idPhysics_Player::CheckJump( void ) {
-	gameLocal.Printf("Current pos: %f %f %f\n", current.origin[0], current.origin[1], current.origin[2]);
+	//gameLocal.Printf("Current pos: %f %f %f\n", current.origin[0], current.origin[1], current.origin[2]);
 	idVec3 addVelocity;
 	int factor = 1;
 
@@ -1322,15 +1317,21 @@ bool idPhysics_Player::CheckJump( void ) {
 		if (jumps != 2) factor = jumps + 1;
 		else factor = 5;
 	}
+	if (jumps == 2) {
+		if (gameLocal.GetLocalPlayer()->PowerUpActive(POWERUP_HASTE)){
+			gameLocal.Printf("Start flying\n");
+			flying = true;
+		}
+		jumps = 0;
+	}
 	addVelocity = 2.0f * maxJumpHeight * -gravityVector * factor * max(sideSpeed/300, 1);
 	addVelocity *= idMath::Sqrt( addVelocity.Normalize() );
 	current.velocity += addVelocity;
 
-// RAVEN BEGIN
+	// RAVEN BEGIN
 // bdube: crouch slide, nick maggoire is awesome
 	current.crouchSlideTime = 0;
-// RAVEN END
-
+	// RAVEN END
 	return true;
 }
 
@@ -1623,6 +1624,20 @@ void idPhysics_Player::MovePlayer( int msec ) {
 	current.velocity += current.pushVelocity;
 	current.lastPushVelocity = current.pushVelocity;
 	current.pushVelocity.Zero();
+
+	// fly with wing cap
+	if (!gameLocal.GetLocalPlayer()->PowerUpActive(POWERUP_HASTE)) flying = false;
+	if (flying) {
+		if (!(HasGroundContacts())) {
+			gameLocal.Printf("Flying\n");
+			idVec3 addVelocity = 0.4 * maxJumpHeight * viewAngles.ToForward();
+			current.velocity += addVelocity;
+		}
+		else {
+			gameLocal.Printf("Stop flying\n");
+			flying = false;
+		}
+	}
 }
 
 
@@ -1963,15 +1978,17 @@ bool idPhysics_Player::Evaluate( int timeStepMSec, int endTimeMSec ) {
 		}
 	}
 // RAVEN END
-	if (current.velocity.IsZero()) {
+	if (current.velocity.IsZero() && !warped) {
 		for (int i = 0; i < NUMWARPS; i++) {
 			if (abs(current.origin[0] - WARPS[i][0][0]) <= 5 && abs(current.origin[1] - WARPS[i][0][1]) <= 5 && abs(current.origin[2] - WARPS[i][0][2]) <= 5) {
 				current.origin[0] = WARPS[i][1][0];
 				current.origin[1] = WARPS[i][1][1];
 				current.origin[2] = WARPS[i][1][2];
+				warped = true;
 			}
 		}
 	}
+	else warped = false;
 
 	return true; //( current.origin != oldOrigin );
 }

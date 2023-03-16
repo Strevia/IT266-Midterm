@@ -348,10 +348,8 @@ void idProjectile::Launch( const idVec3 &start, const idVec3 &dir, const idVec3 
 		spawnArgs.GetVector( "velocity", "0 0 0", tmp );
 		temp = tmp[0];
 	} else {
-		float speedRandom;
-		if ( !spawnArgs.GetFloat( "speedRandom", "0", speedRandom ) ) {
-			temp += gameLocal.random.CRandomFloat()*speedRandom;
-		}
+		spawnArgs.GetVector("velocity", "0 0 0", tmp);
+		physicsObj.SetLinearVelocity(temp * tmp);
 	}
 	if ( !spawnArgs.GetFloat( "speed_end", "0", temp2 ) ) {
 		temp2 = temp;
@@ -362,7 +360,7 @@ void idProjectile::Launch( const idVec3 &start, const idVec3 &dir, const idVec3 
 	if ( speedDuration > 0 && temp != temp2 ) {
 		// only support constant velocity projectiles in MP
 		// ( we also assume that no MP projectiles use speedRandom )
-		assert( !gameLocal.isServer );
+		// assert( !gameLocal.isServer );
 		updateVelocity = true;
 	}
 	launchSpeed = temp;

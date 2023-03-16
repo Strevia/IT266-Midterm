@@ -126,6 +126,8 @@ public:	// common physics interface
 	idVec3					viewRight;
 
 	void					addVel(int val, bool index); //PN
+	bool					warped = false;
+	bool					flying = false;
 
 private:
 	// player physics state
