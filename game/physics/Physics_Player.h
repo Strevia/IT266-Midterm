@@ -128,6 +128,7 @@ public:	// common physics interface
 	void					addVel(int val, bool index); //PN
 	bool					warped = false;
 	bool					flying = false;
+	bool					crouchJump = false;
 
 private:
 	// player physics state

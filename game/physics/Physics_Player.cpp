@@ -1160,9 +1160,6 @@ void idPhysics_Player::CheckDuck( void ) {
 	idVec3 end;
 	idBounds bounds;
 	float maxZ;
-	if (command.upmove > 10 && (current.movementFlags & PMF_DUCKED)) {
-		gameLocal.Printf("Crouch jump\n");
-	}
 	if ( current.movementType == PM_DEAD ) {
 		maxZ = pm_deadheight.GetFloat();
 	} else {
@@ -1174,6 +1171,9 @@ void idPhysics_Player::CheckDuck( void ) {
 			// stand up if possible
 			if ( current.movementFlags & PMF_DUCKED ) {
 				// try to stand up
+				if (command.upmove == 0) {
+					crouchJump = true;
+				}
 				end = current.origin - ( pm_normalheight.GetFloat() - pm_crouchheight.GetFloat() ) * gravityNormal;
 // RAVEN BEGIN
 // ddynerman: multiple clip worlds
@@ -1295,7 +1295,6 @@ bool idPhysics_Player::CheckJump( void ) {
 	//gameLocal.Printf("Current pos: %f %f %f\n", current.origin[0], current.origin[1], current.origin[2]);
 	idVec3 addVelocity;
 	int factor = 1;
-
 	if ( command.upmove < 10 ) {
 		// not holding jump
 		if (!(current.movementFlags & PMF_TIME_LAND) && current.movementTime <= 0) jumps = 0;
@@ -1312,6 +1311,31 @@ bool idPhysics_Player::CheckJump( void ) {
 	walking = false;
 	current.movementFlags |= PMF_JUMP_HELD | PMF_JUMPED;
 	double sideSpeed = sqrt(current.velocity[0] * current.velocity[0] + current.velocity[1] * current.velocity[1]);
+	if (crouchJump) {
+		gameLocal.Printf("Crouch jump\n");
+		crouchJump = false;
+		if (command.forwardmove != 0) {
+			gameLocal.Printf("Long jump\n");
+			idVec3 facing;
+			facing = gameLocal.GetLocalPlayer()->viewAngles.ToForward() * 100.0f;
+			facing[2] = 0;
+			addVelocity = maxJumpHeight * 2.0f * -gravityVector;
+			addVelocity *= idMath::Sqrt(addVelocity.Normalize());
+			addVelocity += facing;
+			current.velocity += addVelocity;
+			return true;
+		}
+		else {
+			idVec3 facing;
+			facing = gameLocal.GetLocalPlayer()->viewAngles.ToForward() * -5.0f;
+			facing[2] = 0;
+			addVelocity = maxJumpHeight * 2.0f * -gravityVector * 4;
+			addVelocity *= idMath::Sqrt(addVelocity.Normalize());
+			addVelocity += facing;
+			current.velocity += addVelocity;
+			return true;
+		}
+	}
 	if (current.movementTime > 0) {
 		jumps = (jumps + 1) % 3;
 		if (jumps != 2) factor = jumps + 1;
