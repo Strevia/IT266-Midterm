@@ -17,6 +17,7 @@ Powerups:
 
 Attacks:
 - The rocket launcher is now a fire flower, bouncing along the ground and getting stuck in walls.
+- The grenade launcher throws hammers, which explode immediately on touching the ground.
 
 Monsters:
 - The grunt functions as a goomba. It moves around randomly, and jumping on it kills it.
