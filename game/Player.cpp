@@ -4300,18 +4300,6 @@ float idPlayer::PowerUpModifier( int type ) {
 		}
 	}
 
-	if ( PowerUpActive( POWERUP_HASTE ) ) {
-		switch ( type ) {
-			case PMOD_SPEED:	
-				mod *= 1.3f;
-				break;
-
-			case PMOD_FIRERATE:
-				mod *= 0.7f;
-				break;
-		}
-	}
-
 	// Arena CTF powerups
 	if( PowerUpActive( POWERUP_AMMOREGEN ) ) {
 		switch( type ) {

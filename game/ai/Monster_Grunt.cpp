@@ -157,14 +157,12 @@ bool rvMonsterGrunt::CheckActions ( void ) {
 		gameLocal.GetLocalPlayer()->Damage(this, this, globalKickDir, "melee_grunt", 1, NULL);
 		return false;
 	}
-	if (gameLocal.GetTime() % 2 == 0) {
-		int degree = gameLocal.random.RandomInt() % 360;
-		float rad = degree * M_PI / 180;
-		idVec3 push = vec3_zero;
-		push[0] = 200 * cos(rad);
-		push[1] = 200 * sin(rad);
-		physicsObj.SetLinearVelocity(push);
-	}
+	int degree = gameLocal.random.RandomInt() % 360;
+	float rad = degree * M_PI / 180;
+	idVec3 push = vec3_zero;
+	push[0] = 200 * cos(rad);
+	push[1] = 200 * sin(rad);
+	physicsObj.SetLinearVelocity(push);
 	return false;
 }
 

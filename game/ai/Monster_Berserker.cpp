@@ -52,6 +52,11 @@ private:
 	stateResult_t		Frame_ChargeGroundImpact		( const stateParms_t& parms );
 	stateResult_t		Frame_DoBlastAttack				( const stateParms_t& parms );
 
+	bool flipped = false;
+	int flipTimer;
+	bool touching, rolling = false;
+	idVec3 direction;
+
 	CLASS_STATES_PROTOTYPE ( rvMonsterBerserker );
 };
 
@@ -189,49 +194,76 @@ rvMonsterBerserker::CheckActions
 ================
 */
 bool rvMonsterBerserker::CheckActions ( void ) {
-	// Pop-up attack is a forward moving melee attack that throws the enemy up in the air
-	if ( PerformAction ( &actionPopupAttack, (checkAction_t)&idAI::CheckAction_LeapAttack, &actionTimerSpecialAttack ) ) {
-		return true;
+	if (rolling) {
+		physicsObj.SetLinearVelocity(direction);
 	}
-
-	// Charge attack is where the berserker will charge up his spike and slam it in to the ground
-	if ( PerformAction ( &actionChargeAttack, (checkAction_t)&rvMonsterBerserker::CheckAction_ChargeAttack, &actionTimerSpecialAttack ) ) {
-		return true;
-	}
-
-	if ( CheckPainActions ( ) ) {
-		return true;
-	}
-
-	if ( PerformAction ( &actionEvadeLeft,   (checkAction_t)&idAI::CheckAction_EvadeLeft, &actionTimerEvade )			 ||
-			PerformAction ( &actionEvadeRight,  (checkAction_t)&idAI::CheckAction_EvadeRight, &actionTimerEvade )			 ||
-			PerformAction ( &actionJumpBack,	 (checkAction_t)&idAI::CheckAction_JumpBack, &actionTimerEvade )			 ||
-			PerformAction ( &actionLeapAttack,  (checkAction_t)&idAI::CheckAction_LeapAttack )	) {
-		return true;
-	} else if ( PerformAction ( &actionMeleeAttack, (checkAction_t)&idAI::CheckAction_MeleeAttack ) ) {
-		standingMeleeNoAttackTime = 0;
-		return true;
-	} else {
-		if ( actionMeleeAttack.status != rvAIAction::STATUS_FAIL_TIMER
-			&& actionMeleeAttack.status != rvAIAction::STATUS_FAIL_EXTERNALTIMER
-			&& actionMeleeAttack.status != rvAIAction::STATUS_FAIL_CHANCE )
-		{//melee attack fail for any reason other than timer?
-			if ( combat.tacticalCurrent == AITACTICAL_MELEE && !move.fl.moving )
-			{//special case: we're in tactical melee and we're close enough to think we've reached the enemy, but he's just out of melee range!
-				//allow ranged attack
-				if ( !standingMeleeNoAttackTime )
-				{
-					standingMeleeNoAttackTime = gameLocal.GetTime();
-				}
-				else if ( standingMeleeNoAttackTime + 2500 < gameLocal.GetTime() )
-				{//we've been standing still and not attacking for at least 2.5 seconds, fall back to ranged attack
-					actionRangedAttack.fl.disabled = false;
-				}
+	int distance = DistanceTo(gameLocal.GetLocalPlayer());
+	if (distance <= 50 && !touching) {
+		idVec3 position;
+		idMat3 _;
+		gameLocal.GetLocalPlayer()->GetPosition(position, _);
+		touching = true;
+		if (gameLocal.GetLocalPlayer()->PowerUpActive(POWERUP_QUADDAMAGE)) {
+			Killed(gameLocal.GetLocalPlayer(), gameLocal.GetLocalPlayer(), health, vec3_origin, 0);
+			return false;
+		}
+		if (flipped && !rolling) {
+			rolling = true;
+			direction = (position - physicsObj.GetCenterMass());
+			float length = sqrt(direction[0] * direction[0] + direction[1] * direction[1]);
+			direction.Set(200 * direction.x / length, 200 * direction.y / length, 0);
+			gameLocal.Printf("Direction: %f, %f, %f\n", direction[0], direction[1], direction[2]);
+			return false;
+		}
+		idBounds bound = physicsObj.GetBounds();
+		if (gameLocal.GetLocalPlayer()->GetPhysics()->GetLinearVelocity()[2] < 0) {
+			gameLocal.Printf("Jumped on him\n");
+			if (!flipped) {
+				flipped = true;
+				flipTimer = 1000;
+				idMat3 flip = physicsObj.GetAxis();
+				flip.RotateRelative(1, 180);
+				physicsObj.SetAxis(flip);
+				idVec3 pos = physicsObj.GetOrigin();
+				pos[2] += 86;
+				physicsObj.SetOrigin(pos);
+				gameLocal.GetLocalPlayer()->UpdateAccel(100, false);
 			}
+			if (rolling) {
+				rolling = false;
+				physicsObj.SetLinearVelocity(vec3_zero);
+			}
+			return false;
 		}
-		if ( PerformAction ( &actionRangedAttack,(checkAction_t)&rvMonsterBerserker::CheckAction_RangedAttack, &actionTimerRangedAttack ) ) {
-			return true;
-		}
+		idVec3	kickDir = physicsObj.GetOrigin() - position;
+		kickDir /= kickDir.Length();
+
+		idVec3	globalKickDir;
+		globalKickDir = (viewAxis * physicsObj.GetGravityAxis()) * kickDir;
+
+		gameLocal.GetLocalPlayer()->Damage(this, this, globalKickDir, "melee_grunt", 1, NULL);
+		return false;
+	}
+	touching = false;
+	if (flipTimer == 0 && flipped) {
+		flipped = false;
+		idMat3 flip = physicsObj.GetAxis();
+		flip.RotateRelative(1, 180);
+		physicsObj.SetAxis(flip);
+		idVec3 pos = physicsObj.GetOrigin();
+		pos[2] -= 86;
+		physicsObj.SetOrigin(pos);
+	}
+	if (!flipped) {
+		int degree = gameLocal.random.RandomInt() % 360;
+		float rad = degree * M_PI / 180;
+		idVec3 push = vec3_zero;
+		push[0] = 200 * cos(rad);
+		push[1] = 200 * sin(rad);
+		physicsObj.SetLinearVelocity(push);
+	}
+	else {
+		flipTimer--;
 	}
 	return false;
 }
