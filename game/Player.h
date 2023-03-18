@@ -580,7 +580,7 @@ public:
 	bool					WeaponIsEnabled				( void ) const { return weaponEnabled; }
 	void					ShowCrosshair				( void );
 	void					HideCrosshair				( void );
-	void					UpdateAccel					(int num, bool index); //PN: New function
+	void					UpdateAccel					(float num, bool index); //PN: New function
 // RAVEN END
 
 //RAVEN BEGIN
@@ -797,7 +797,7 @@ public:
 	void					SetCash( float newCashAmount );
 	void					ResetCash();
 // RITUAL END
-	void					Move(bool changeAccel, int val, bool index);
+	void					Move(bool changeAccel, float val, bool index);
 	bool					mini = false;
 	bool					spring = false;
 protected:

@@ -144,7 +144,7 @@ bool rvMonsterGrunt::CheckActions ( void ) {
 		gameLocal.GetLocalPlayer()->GetPosition(position, _);
 		if (gameLocal.GetLocalPlayer()->GetPhysics()->GetLinearVelocity()[2] < 0) {
 			gameLocal.Printf("Jumped on him\n");
-			gameLocal.GetLocalPlayer()->UpdateAccel(100, false);
+			gameLocal.GetLocalPlayer()->UpdateAccel(0.1, false);
 			Killed(gameLocal.GetLocalPlayer(), gameLocal.GetLocalPlayer(), health, vec3_origin, 0);
 			return false;
 		}

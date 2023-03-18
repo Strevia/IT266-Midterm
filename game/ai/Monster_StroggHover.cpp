@@ -452,6 +452,8 @@ void rvMonsterStroggHover::Think ( void ) {
 	
 	if ( !aifl.dead )
 	{
+		CheckActions();
+		return;
 		// If thinking we should play an effect on the ground under us
 		if ( !fl.hidden && !fl.isDormant && (thinkFlags & TH_THINK ) && !aifl.dead ) {
 			trace_t tr;
@@ -711,6 +713,7 @@ bool rvMonsterStroggHover::Collide( const trace_t &collision, const idVec3 &velo
 		SetState ( "State_Remove" );
 		return false;
 	}
+	return false;
 	return idAI::Collide( collision, velocity );
 }
 
@@ -862,39 +865,31 @@ rvMonsterStroggHover::Spawn
 ================
 */
 bool rvMonsterStroggHover::CheckActions ( void ) {
-	if ( PerformAction ( &actionCircleStrafe,  (checkAction_t)&rvMonsterStroggHover::CheckAction_CircleStrafe ) ) {
-		return true;
-	}
+	int distance = DistanceTo(gameLocal.GetLocalPlayer());
+	idVec3 position;
+	idMat3 _;
+	gameLocal.GetLocalPlayer()->GetPosition(position, _);
+	if (distance <= 5) {
+		if (gameLocal.GetLocalPlayer()->PowerUpActive(POWERUP_QUADDAMAGE)) {
+			Killed(gameLocal.GetLocalPlayer(), gameLocal.GetLocalPlayer(), health, vec3_origin, 0);
+			return false;
+		}
+		idBounds bound = physicsObj.GetBounds();
+		idVec3	kickDir = physicsObj.GetOrigin() - position;
+		kickDir /= kickDir.Length();
 
-/*
-	if ( PerformAction ( &actionRocketAttack, (checkAction_t)&idAI::CheckAction_RangedAttack, &actionTimerSpecialAttack ) ) {
-		return true;
-	}
+		idVec3	globalKickDir;
+		globalKickDir = (viewAxis * physicsObj.GetGravityAxis()) * kickDir;
 
-	if ( PerformAction ( &actionBlasterAttack, (checkAction_t)&idAI::CheckAction_RangedAttack, &actionTimerRangedAttack ) ) {
-		return true;
+		gameLocal.GetLocalPlayer()->Damage(this, this, globalKickDir, "melee_grunt", 1, NULL);
+		return false;
 	}
-*/
-	if ( PerformAction ( &actionBombAttack, (checkAction_t)&rvMonsterStroggHover::CheckAction_BombAttack ) ) {
-		return true;
-	}
-
-	if ( PerformAction ( &actionMissileAttack, (checkAction_t)&idAI::CheckAction_RangedAttack, &actionTimerRangedAttack ) ) {
-		return true;
-	}
-
-	if ( PerformAction ( &actionMGunAttack, (checkAction_t)&idAI::CheckAction_RangedAttack, &actionTimerRangedAttack ) ) {
-		return true;
-	}
-
-	if ( idAI::CheckActions ( ) ) {
-		return true;
-	}
-
-	if ( PerformAction ( &actionStrafe,  (checkAction_t)&rvMonsterStroggHover::CheckAction_Strafe ) ) {
-		return true;
-	}
-	
+	idVec3 direction = (position - physicsObj.GetCenterMass());
+	idVec3 forward = gameLocal.GetLocalPlayer()->viewAngles.ToForward();
+	forward /= forward.Length();
+	float length = sqrt(direction[0] * direction[0] + direction[1] * direction[1] + direction[2] * direction[2]);
+	direction /= length;
+	if ((direction * forward <= -0.25 && direction * forward >= -0.75) || true) physicsObj.SetLinearVelocity(direction);
 	return false;
 }
 

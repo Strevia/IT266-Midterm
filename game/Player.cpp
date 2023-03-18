@@ -8928,11 +8928,11 @@ idPlayer::Move
 ==============
 */
 // PN: New Code
-void idPlayer::UpdateAccel(int num, bool index) {
+void idPlayer::UpdateAccel(float num, bool index) {
 	Move(true, num, index);
 }
 // End new Code
-void idPlayer::Move(bool changeAccel = false, int val = 0, bool index = false ) {
+void idPlayer::Move(bool changeAccel = false, float val = 0, bool index = false ) {
 	float newEyeOffset;
 	idVec3 oldOrigin;
 	idVec3 oldVelocity;

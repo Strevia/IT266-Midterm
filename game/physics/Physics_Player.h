@@ -125,7 +125,7 @@ public:	// common physics interface
 	idVec3					viewForward;
 	idVec3					viewRight;
 
-	void					addVel(int val, bool index); //PN
+	void					addVel(float val, bool index); //PN
 	bool					warped = false;
 	bool					flying = false;
 	bool					crouchJump = false;

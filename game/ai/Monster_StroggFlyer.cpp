@@ -19,6 +19,7 @@ public:
 	void				Restore				( idRestoreGame *savefile );
 
 	virtual void		GetDebugInfo		( debugInfoProc_t proc, void* userData );
+	virtual bool		Collide(const trace_t& collision, const idVec3& velocity);
 
 protected:
 
@@ -70,6 +71,9 @@ rvMonsterStroggFlyer::rvMonsterStroggFlyer ( ) {
 	shotCount = 0;
 	lastAttackTime = 0;
 	attackStartTime = 0;
+}
+bool rvMonsterStroggFlyer::Collide(const trace_t& collision, const idVec3& velocity) {
+	return false;
 }
 
 void rvMonsterStroggFlyer::InitSpawnArgsVariables( void )
@@ -189,11 +193,32 @@ rvMonsterStroggFlyer::CheckActions
 ================
 */
 bool rvMonsterStroggFlyer::CheckActions ( void ) {
-	if ( PerformAction ( &actionBombAttack, (checkAction_t)&idAI::CheckAction_RangedAttack, &actionTimerRangedAttack )    ||
-	     PerformAction ( &actionBlasterAttack, (checkAction_t)&idAI::CheckAction_RangedAttack, &actionTimerRangedAttack )    ) {
-		return true;
+	int distance = DistanceTo(gameLocal.GetLocalPlayer());
+	idVec3 position;
+	idMat3 _;
+	gameLocal.GetLocalPlayer()->GetPosition(position, _);
+	if (distance <= 70) {
+		if (gameLocal.GetLocalPlayer()->PowerUpActive(POWERUP_QUADDAMAGE)) {
+			Killed(gameLocal.GetLocalPlayer(), gameLocal.GetLocalPlayer(), health, vec3_origin, 0);
+			return false;
+		}
+		idBounds bound = physicsObj.GetBounds();
+		idVec3	kickDir = physicsObj.GetOrigin() - position;
+		kickDir /= kickDir.Length();
+
+		idVec3	globalKickDir;
+		globalKickDir = (viewAxis * physicsObj.GetGravityAxis()) * kickDir;
+
+		gameLocal.GetLocalPlayer()->Damage(this, this, globalKickDir, "melee_grunt", 1, NULL);
+		return false;
 	}
-	return idAI::CheckActions ( );
+	idVec3 direction = (position - physicsObj.GetCenterMass());
+	idVec3 forward = gameLocal.GetLocalPlayer()->viewAngles.ToForward();
+	forward /= forward.Length();
+	float length = sqrt(direction[0] * direction[0] + direction[1] * direction[1] + direction[2] * direction[2]);
+	direction /= length;
+	if (!(direction * forward <= -0.8 && direction * forward >= -1)) physicsObj.SetLinearVelocity(direction * 30);
+	return false;
 }
 
 /*

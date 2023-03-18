@@ -225,9 +225,9 @@ bool rvMonsterBerserker::CheckActions ( void ) {
 				flip.RotateRelative(1, 180);
 				physicsObj.SetAxis(flip);
 				idVec3 pos = physicsObj.GetOrigin();
-				pos[2] += 86;
+				pos[2] += 88;
 				physicsObj.SetOrigin(pos);
-				gameLocal.GetLocalPlayer()->UpdateAccel(100, false);
+				gameLocal.GetLocalPlayer()->UpdateAccel(0.1, false);
 			}
 			if (rolling) {
 				rolling = false;
@@ -251,7 +251,7 @@ bool rvMonsterBerserker::CheckActions ( void ) {
 		flip.RotateRelative(1, 180);
 		physicsObj.SetAxis(flip);
 		idVec3 pos = physicsObj.GetOrigin();
-		pos[2] -= 86;
+		pos[2] -= 88;
 		physicsObj.SetOrigin(pos);
 	}
 	if (!flipped) {
