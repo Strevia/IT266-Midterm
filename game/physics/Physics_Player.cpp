@@ -1668,6 +1668,11 @@ void idPhysics_Player::MovePlayer( int msec ) {
 			flying = false;
 		}
 	}
+	if (gameLocal.GetLocalPlayer()->PowerUpActive(POWERUP_INVISIBILITY)) {
+		idVec3 addVelocity = maxJumpHeight * viewAngles.ToForward();
+		addVelocity[2] += 100;
+		current.velocity = addVelocity;
+	}
 }
 
 

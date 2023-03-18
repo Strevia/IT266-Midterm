@@ -16,6 +16,7 @@ Powerups:
 - The haste powerup is a wing cap. While it is active you can triple jump to fly.
 - The regeneration powerup is now a mini mushroom. You can jump much higher but you only have one health. Note: While there is a timer it does not actually mean anything, and the mini mushroom lasts until you die.
 - The guard powerup is now a spring mushroom. You constantly spring off the ground and can do an extra high jump by pressing the jump button.
+- The invisibility powerup is now a P balloon. While it is active, you float upwards until it runs out of time/
 
 Attacks:
 - The rocket launcher is now a fire flower, bouncing along the ground and getting stuck in walls.
