@@ -26,6 +26,7 @@ Monsters:
 - The grunt functions as a goomba. It moves around randomly, and jumping on it kills it.
 - The berserker functions as a koopa. Jumping on it flips it over. Kicking it while it's flipped over pushes it. Jumping on it while it's rolling makes it stop rolling. After it's been flipped for some time it will flip back over.
 - The strogg hover functions as a boo. It will steadily travel towards the player unless the player is looking at it.
+- The gladiator functions as a spiny. This works the same as a goomba except you can't jump on it to kill it.
 
 Interactables:
 - The medic in the first area functions as a chuckster. Talk to him and he will throw you very high in the air.

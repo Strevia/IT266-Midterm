@@ -144,93 +144,33 @@ stays hidden behind his shield if getting shot at.
 */
 bool rvMonsterGladiator::CheckActions ( void ) {
 	// If not moving, try turning in place
-	if ( !move.fl.moving && gameLocal.time > nextTurnTime ) {
-		float turnYaw = idMath::AngleNormalize180 ( move.ideal_yaw - move.current_yaw ) ;
-		if ( turnYaw > lookMax[YAW] * 0.75f || (turnYaw > 0 && !enemy.fl.inFov) ) {
-			PerformAction ( "Torso_TurnRight90", 4, true );
-			return true;
-		} else if ( turnYaw < -lookMax[YAW] * 0.75f || (turnYaw < 0 && !enemy.fl.inFov) ) {
-			PerformAction ( "Torso_TurnLeft90", 4, true );
-			return true;
+	int distance = DistanceTo(gameLocal.GetLocalPlayer());
+	if (distance <= 50) {
+		if (gameLocal.GetLocalPlayer()->PowerUpActive(POWERUP_QUADDAMAGE)) {
+			Killed(gameLocal.GetLocalPlayer(), gameLocal.GetLocalPlayer(), health, vec3_origin, 0);
+			return false;
 		}
-	}
+		idBounds bound = physicsObj.GetBounds();
+		idVec3 position;
+		idMat3 _;
+		gameLocal.GetLocalPlayer()->GetPosition(position, _);
+		idVec3	kickDir = physicsObj.GetOrigin() - position;
+		kickDir /= kickDir.Length();
 
-	if ( CheckPainActions ( ) ) {
-		return true;
-	}
+		idVec3	globalKickDir;
+		globalKickDir = (viewAxis * physicsObj.GetGravityAxis()) * kickDir;
 
-	// Limited actions with shield out
-	if ( usingShield ) {
-		if ( railgunHealth > 0 && PerformAction ( &actionRailgunAttack, (checkAction_t)&idAI::CheckAction_RangedAttack, &actionTimerSpecialAttack ) ) {
-			return true;
-		}
-		if ( move.moveCommand == MOVE_TO_ENEMY
-			&& move.fl.moving )
-		{//advancing on enemy with shield up
-			if ( gameLocal.GetTime() - lastShotTime > 1500 )
-			{//been at least a second since the last time we fired while moving
-				if ( !gameLocal.random.RandomInt(2) )
-				{//fire!
-					PerformAction ( "Torso_ShieldFire", 0, true );
-					return true;
-				}
-			}
-		}
-		// Only ranged attack and melee attack are available when using shield
-		if ( PerformAction ( &actionMeleeAttack, (checkAction_t)&idAI::CheckAction_MeleeAttack )							    ||
-			 PerformAction ( &actionRangedAttack, (checkAction_t)&idAI::CheckAction_RangedAttack, &actionTimerRangedAttack )   ||
-			 ( railgunHealth > 0 
-				&& gameLocal.GetTime() - shieldStartTime > 2000
-				&& gameLocal.time - pain.lastTakenTime > 500
-				&& gameLocal.time - combat.shotAtTime > 300
-				&& gameLocal.GetTime() - shieldLastHitTime > 500
-				&& PerformAction ( &actionRailgunAttack, (checkAction_t)&idAI::CheckAction_RangedAttack, &actionTimerSpecialAttack ) ) ) {
-			shieldWaitTime = 0;
-			return true;
-		}
-
-		// see if it's safe to lower it?
-		if ( gameLocal.GetTime() - shieldStartTime > 2000 )
-		{//shield's been up for at least 2 seconds
-			if ( !enemy.fl.visible || (gameLocal.time - combat.shotAtTime > 1000 && gameLocal.GetTime() - shieldLastHitTime > 1500) )
-			{
-				if ( gameLocal.time - pain.lastTakenTime > 1500 )
-				{
-					PerformAction ( "Torso_ShieldEnd", 4, true );
-					return true;
-				}
-			}
-		}
-		
+		gameLocal.GetLocalPlayer()->Damage(this, this, globalKickDir, "melee_grunt", 1, NULL);
 		return false;
 	}
-	else
-	{// Bring the shield out?
-		if ( combat.tacticalCurrent != AITACTICAL_MELEE || move.fl.done )
-		{//not while rushing (NOTE: unless railgun was just destroyed?)
-			if ( enemy.fl.visible && enemy.fl.inFov )
-			{
-				if ( combat.fl.aware && shieldWaitTime < gameLocal.GetTime() ) 
-				{
-					if ( gameLocal.time - pain.lastTakenTime <= 1500
-						|| ( combat.shotAtAngle < 0 && gameLocal.time - combat.shotAtTime < 100 ) 
-						|| !gameLocal.random.RandomInt( 20 ) )
-					{
-						if ( !gameLocal.random.RandomInt( 5 ) )
-						{
-							PerformAction ( "Torso_ShieldStart", 4, true );
-							return true;
-						}
-					}
-				}
-			}
-		}
-		if ( railgunHealth > 0 && PerformAction ( &actionRailgunAttack, (checkAction_t)&idAI::CheckAction_RangedAttack, &actionTimerSpecialAttack ) ) {
-			return true;
-		}
-	}
-	
-	return idAI::CheckActions ( );
+	int degree = gameLocal.random.RandomInt() % 360;
+	float rad = degree * M_PI / 180;
+	idVec3 push = vec3_zero;
+	push[0] = 200 * cos(rad);
+	push[1] = 200 * sin(rad);
+	physicsObj.SetLinearVelocity(push);
+		
+	return false;
 }
 
 /*
