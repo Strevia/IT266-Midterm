@@ -4680,9 +4680,7 @@ bool idPlayer::GivePowerUp( int powerup, int time, bool team ) {
 			break;
 		}
 		case POWERUP_GUARD: {
-			nextHealthPulse = gameLocal.time + HEALTH_PULSE;
-			inventory.maxHealth = 200;
-			inventory.maxarmor = 200;
+			spring = true;
 
 			break;
 		}

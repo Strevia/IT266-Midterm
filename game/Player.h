@@ -799,6 +799,7 @@ public:
 // RITUAL END
 	void					Move(bool changeAccel, int val, bool index);
 	bool					mini = false;
+	bool					spring = false;
 protected:
 	void					SetupHead( const char* modelKeyName = "", idVec3 headOffset = idVec3(0, 0, 0) );
 

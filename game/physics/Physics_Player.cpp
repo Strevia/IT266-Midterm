@@ -1295,12 +1295,20 @@ bool idPhysics_Player::CheckJump( void ) {
 	//gameLocal.Printf("Current pos: %f %f %f\n", current.origin[0], current.origin[1], current.origin[2]);
 	idVec3 addVelocity;
 	int factor = 1;
+	if (gameLocal.GetLocalPlayer()->spring && !(current.movementFlags & PMF_TIME_LAND)) {
+		if (command.upmove > 10) {
+			addVel(100, false);
+		}
+		else {
+			addVel(30, false);
+		}
+		return true;
+	}
 	if ( command.upmove < 10 ) {
 		// not holding jump
 		if (!(current.movementFlags & PMF_TIME_LAND) && current.movementTime <= 0) jumps = 0;
 		return false;
 	}
-
 	// must wait for jump to be released
 	if ( current.movementFlags & PMF_JUMP_HELD ) {
 		return false;
@@ -1362,7 +1370,6 @@ bool idPhysics_Player::CheckJump( void ) {
 void idPhysics_Player::addVel(int val, bool index) {
 	if (current.velocity[2] != 0 || index) {
 		idVec3 addVelocity = 2.0f * maxJumpHeight * -gravityVector*0.1*val;
-		addVelocity *= idMath::Sqrt(addVelocity.Normalize());
 		current.velocity += addVelocity;
 	}
 }
