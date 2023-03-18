@@ -4666,13 +4666,9 @@ bool idPlayer::GivePowerUp( int powerup, int time, bool team ) {
 		}
 
 		case POWERUP_REGENERATION: {
-			nextHealthPulse = gameLocal.time + HEALTH_PULSE;
-
-			// Have to test for this because buying the team regeneration powerup will cause
-			// this to get hit multiple times as the server distributes the powerups to the clients.
-			if ( gameLocal.GetLocalPlayer() == this ) {
-				gameLocal.mpGame.ScheduleAnnouncerSound( AS_GENERAL_REGENERATION, gameLocal.time, gameLocal.gameType == GAME_TOURNEY ? GetInstance() : -1 );
-			}
+			mini = true;
+			health = 1;
+			pm_jumpheight.SetFloat(pm_jumpheight.GetFloat() * 3);
 			break;
 		}
 		case POWERUP_HASTE: {
@@ -4863,7 +4859,7 @@ void idPlayer::UpdatePowerUps( void ) {
 // RITUAL BEGIN
 // squirrel: health regen only applies if you have positive health
 		if( health > 0 ) {
-			if ( PowerUpActive ( POWERUP_REGENERATION ) || PowerUpActive ( POWERUP_GUARD ) ) {
+			if ( PowerUpActive ( POWERUP_REGENERATION ) || PowerUpActive ( POWERUP_GUARD ) && false ) {
 				int healthBoundary = inventory.maxHealth; // health will regen faster under this value, slower above
 				int healthTic = 15;
 

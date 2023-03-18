@@ -129,6 +129,7 @@ public:	// common physics interface
 	bool					warped = false;
 	bool					flying = false;
 	bool					crouchJump = false;
+	float					maxJumpHeight;
 
 private:
 	// player physics state
@@ -139,7 +140,6 @@ private:
 	float					walkSpeed;
 	float					crouchSpeed;
 	float					maxStepHeight;
-	float					maxJumpHeight;
 	int						debugLevel;				// if set, diagnostic output will be printed
 
 	// player input

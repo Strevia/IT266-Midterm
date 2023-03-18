@@ -1305,7 +1305,6 @@ bool idPhysics_Player::CheckJump( void ) {
 	if ( current.movementFlags & PMF_JUMP_HELD ) {
 		return false;
 	}
-
 	// don't jump if we can't stand up
 	groundPlane = false;		// jumping away
 	walking = false;
