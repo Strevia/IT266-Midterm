@@ -195,7 +195,8 @@ rvMonsterBerserker::CheckActions
 */
 bool rvMonsterBerserker::CheckActions ( void ) {
 	if (rolling) {
-		physicsObj.SetLinearVelocity(direction);
+		physicsObj.SetOrigin(physicsObj.GetOrigin() + direction);
+		flipTimer = 100;
 	}
 	int distance = DistanceTo(gameLocal.GetLocalPlayer());
 	if (distance <= 50 && !touching) {
@@ -211,7 +212,7 @@ bool rvMonsterBerserker::CheckActions ( void ) {
 			rolling = true;
 			direction = (position - physicsObj.GetCenterMass());
 			float length = sqrt(direction[0] * direction[0] + direction[1] * direction[1]);
-			direction.Set(200 * direction.x / length, 200 * direction.y / length, 0);
+			direction.Set(direction.x / length, direction.y / length, 0);
 			gameLocal.Printf("Direction: %f, %f, %f\n", direction[0], direction[1], direction[2]);
 			return false;
 		}
@@ -221,11 +222,12 @@ bool rvMonsterBerserker::CheckActions ( void ) {
 			if (!flipped) {
 				flipped = true;
 				flipTimer = 1000;
+				float height = bound.Size()[2];
 				idMat3 flip = physicsObj.GetAxis();
 				flip.RotateRelative(1, 180);
 				physicsObj.SetAxis(flip);
 				idVec3 pos = physicsObj.GetOrigin();
-				pos[2] += 88;
+				pos[2] += height;
 				physicsObj.SetOrigin(pos);
 				gameLocal.GetLocalPlayer()->UpdateAccel(0.1, false);
 			}
@@ -251,10 +253,12 @@ bool rvMonsterBerserker::CheckActions ( void ) {
 		flip.RotateRelative(1, 180);
 		physicsObj.SetAxis(flip);
 		idVec3 pos = physicsObj.GetOrigin();
-		pos[2] -= 88;
+		idBounds bound = physicsObj.GetBounds();
+		float height = bound.Size()[2];
+		pos[2] -= height;
 		physicsObj.SetOrigin(pos);
 	}
-	if (!flipped) {
+	if (!flipped && !rolling) {
 		int degree = gameLocal.random.RandomInt() % 360;
 		float rad = degree * M_PI / 180;
 		idVec3 push = vec3_zero;

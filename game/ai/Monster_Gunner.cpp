@@ -56,6 +56,9 @@ private:
 	// Torso States
 	stateResult_t		State_Torso_NailgunAttack		( const stateParms_t& parms );
 	stateResult_t		State_Torso_MovingRangedAttack	( const stateParms_t& parms );
+	bool charging = false;
+	int chargeTime = 0;
+	idVec3 chargeDirection;
 
 	CLASS_STATES_PROTOTYPE ( rvMonsterGunner );
 };
@@ -270,24 +273,49 @@ rvMonsterGunner::CheckActions
 ================
 */
 bool rvMonsterGunner::CheckActions ( void ) {
-	// Fire a grenade?
-	if ( PerformAction ( &actionGrenadeAttack, (checkAction_t)&idAI::CheckAction_RangedAttack, &actionTimerSpecialAttack ) ||
-		 PerformAction ( &actionNailgunAttack, (checkAction_t)&idAI::CheckAction_RangedAttack, &actionTimerRangedAttack )     )  {
-		return true;
-	}
-
-	bool action = idAI::CheckActions( );
-	if ( !action ) {
-		//try a strafe
-		if ( GetEnemy() && enemy.fl.visible && gameLocal.GetTime()-lastAttackTime > actionTimerRangedAttack.GetRate()+1000 ) {
-			//we can see our enemy but haven't been able to shoot him in a while...
-			if ( PerformAction ( &actionSideStepLeft, (checkAction_t)&rvMonsterGunner::CheckAction_SideStepLeft, &actionTimerSideStep )
-				|| PerformAction ( &actionSideStepRight, (checkAction_t)&rvMonsterGunner::CheckAction_SideStepRight, &actionTimerSideStep ) ) {
-				return true;
-			}
+	int distance = DistanceTo(gameLocal.GetLocalPlayer());
+	idVec3 position;
+	idMat3 _;
+	gameLocal.GetLocalPlayer()->GetPosition(position, _);
+	if (distance <= 50) {
+		if (gameLocal.GetLocalPlayer()->PowerUpActive(POWERUP_QUADDAMAGE)) {
+			Killed(gameLocal.GetLocalPlayer(), gameLocal.GetLocalPlayer(), health, vec3_origin, 0);
+			return false;
 		}
+		idBounds bound = physicsObj.GetBounds();
+		if (gameLocal.GetLocalPlayer()->GetPhysics()->GetLinearVelocity()[2] < 0) {
+			gameLocal.Printf("Jumped on him\n");
+			gameLocal.GetLocalPlayer()->UpdateAccel(0.1, false);
+			Killed(gameLocal.GetLocalPlayer(), gameLocal.GetLocalPlayer(), health, vec3_origin, 0);
+			return false;
+		}
+		idVec3	kickDir = physicsObj.GetOrigin() - position;
+		kickDir /= kickDir.Length();
+
+		idVec3	globalKickDir;
+		globalKickDir = (viewAxis * physicsObj.GetGravityAxis()) * kickDir;
+
+		gameLocal.GetLocalPlayer()->Damage(this, this, globalKickDir, "melee_grunt", 1, NULL);
+		return false;
 	}
-	return action;
+	if (!charging) {
+		chargeDirection = position - physicsObj.GetOrigin();
+		chargeDirection[2] = 0;
+		chargeDirection /= sqrt(chargeDirection[0] * chargeDirection[0] + chargeDirection[1] * chargeDirection[1] + chargeDirection[2] * chargeDirection[2]);
+		chargeTime = 100;
+		charging = true;
+		gameLocal.Printf("Start charging\n");
+	}
+	else if (chargeTime) {
+		gameLocal.Printf("Charging %d\n", chargeTime);
+		chargeTime--;
+	}
+	else {
+		gameLocal.Printf("Charge Direction: %f, %f, %f\n", chargeDirection[0], chargeDirection[1], chargeDirection[2]);
+		physicsObj.SetOrigin(physicsObj.GetOrigin() + chargeDirection * 5);
+	}
+	
+	return false;
 }
 
 /*
