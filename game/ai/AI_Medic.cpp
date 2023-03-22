@@ -307,7 +307,7 @@ void rvAIMedic::TakePatient( idPlayer* pPatient )
 		healDebounceTime = gameLocal.GetTime() + healDebounceInterval;
 	}
 	gameLocal.inCinematic = false;
-	gameLocal.GetLocalPlayer()->UpdateAccel(100, 2);
+	gameLocal.GetLocalPlayer()->UpdateAccel(0.1, 2);
 }
 
 void rvAIMedic::DropPatient( void )
